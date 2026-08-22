@@ -1,10 +1,10 @@
-import{p as x,t as b}from"./glsl.js";import{S,O as T,P,c as z,d as c,M as D,C}from"./three.module.js";const G={id:"gyroid",title:"Gyroid",tags:["raymarching","sdf","no geometry"],blurb:"There is no mesh in this scene. Two triangles cover the screen and a fragment shader walks a ray through a distance field for every pixel, solving a gyroid minimal surface analytically. Normals, soft shadows and ambient occlusion are all derived from the same distance function.",stats:{triangles:"2","max ray steps":"96",geometry:"implicit"},params:{thickness:{label:"Wall thickness",type:"range",min:.08,max:.6,step:.01,value:.28},scale:{label:"Lattice scale",type:"range",min:1.5,max:6,step:.05,value:3},speed:{label:"Rotation",type:"range",min:0,max:.5,step:.01,value:.12}}},R=`
+import{p as x,t as b}from"./glsl.js";import{S,O as T,P as D,c as P,d as l,M as z,C as R}from"./three.module.js";const N={id:"gyroid",title:"Gyroid",tags:["raymarching","sdf","no geometry"],blurb:"There is no mesh in this scene. Two triangles cover the screen and a fragment shader walks a ray through a distance field for every pixel, solving a gyroid minimal surface analytically. Normals, soft shadows and ambient occlusion are all derived from the same distance function.",stats:{triangles:"2","max ray steps":"96",geometry:"implicit"},params:{thickness:{label:"Wall thickness",type:"range",min:.08,max:.6,step:.01,value:.28},scale:{label:"Lattice scale",type:"range",min:1.5,max:6,step:.05,value:3},speed:{label:"Rotation",type:"range",min:0,max:.5,step:.01,value:.12},detail:{label:"Fine detail",type:"range",min:0,max:.35,step:.005,value:.12},steps:{label:"Ray steps",type:"range",min:24,max:160,step:1,value:96},hue:{label:"Hue",type:"range",min:0,max:1,step:.005,value:0},glow:{label:"Rim light",type:"range",min:0,max:2,step:.01,value:.75}}},C=`
   varying vec2 vUv;
   void main(){
     vUv = uv;
     gl_Position = vec4(position.xy, 0.0, 1.0);
   }
-`,N=`
+`,G=`
   precision highp float;
 
   uniform vec2  uResolution;
@@ -13,6 +13,10 @@ import{p as x,t as b}from"./glsl.js";import{S,O as T,P,c as z,d as c,M as D,C}fr
   uniform float uThickness;
   uniform float uScale;
   uniform float uSpeed;
+  uniform float uDetail;
+  uniform float uSteps;
+  uniform float uHue;
+  uniform float uGlow;
 
   varying vec2 vUv;
 
@@ -40,7 +44,7 @@ import{p as x,t as b}from"./glsl.js";import{S,O as T,P,c as z,d as c,M as D,C}fr
     float coarse = gyroid(p, uScale, uThickness);
     float fine   = gyroid(p, uScale * 3.23, uThickness * 0.71);
 
-    float surface = coarse - fine * 0.12;
+    float surface = coarse - fine * uDetail;
 
     return max(shell, surface * 0.55);
   }
@@ -96,7 +100,8 @@ import{p as x,t as b}from"./glsl.js";import{S,O as T,P,c as z,d as c,M as D,C}fr
     float dist = 0.0;
     bool hit = false;
 
-    for (int i = 0; i < 96; i++){
+    for (int i = 0; i < 160; i++){
+      if (float(i) >= uSteps) break;
       vec3 p = ro + rd * t;
       dist = map(p);
       if (dist < 0.0008 * t){ hit = true; break; }
@@ -126,7 +131,7 @@ import{p as x,t as b}from"./glsl.js";import{S,O as T,P,c as z,d as c,M as D,C}fr
         vec3(0.42, 0.38, 0.50),
         vec3(0.40, 0.36, 0.42),
         vec3(1.00, 0.90, 0.75),
-        vec3(0.12, 0.30, 0.55)
+        vec3(0.12, 0.30, 0.55) + uHue
       );
 
       vec3 halfVec = normalize(keyDir + viewDir);
@@ -134,7 +139,7 @@ import{p as x,t as b}from"./glsl.js";import{S,O as T,P,c as z,d as c,M as D,C}fr
 
       col  = base * (0.16 + 0.90 * key * shadow) * occ;
       col += vec3(1.0, 0.96, 0.92) * spec * shadow * 0.55;
-      col += vec3(0.35, 0.60, 1.00) * fresnel * 0.75;
+      col += vec3(0.35, 0.60, 1.00) * fresnel * uGlow;
 
       // Distance haze keeps the far side of the lattice from reading as noise.
       col = mix(col, vec3(0.02, 0.03, 0.06), smoothstep(3.4, 7.2, t));
@@ -149,4 +154,4 @@ import{p as x,t as b}from"./glsl.js";import{S,O as T,P,c as z,d as c,M as D,C}fr
 
     gl_FragColor = vec4(col, 1.0);
   }
-`;function M({renderer:i,width:u,height:d,params:s={}}){const r=new S,v=new T(-1,1,1,-1,0,1),n=new P(2,2),a=new z({vertexShader:R,fragmentShader:N,depthTest:!1,depthWrite:!1,uniforms:{uResolution:{value:new c(u,d)},uTime:{value:0},uPointer:{value:new c(0,0)},uThickness:{value:s.thickness??.28},uScale:{value:s.scale??3},uSpeed:{value:s.speed??.12}}}),l=new D(n,a);l.frustumCulled=!1,r.add(l);const t=new c(0,0),m=new C(263434);function p(e,f,o){a.uniforms.uTime.value=e;const w=o.active?o.x:0,k=o.active?o.y:0;t.x+=(w-t.x)*.05,t.y+=(k-t.y)*.05,a.uniforms.uPointer.value.copy(t),i.render(r,v)}function h(e,f){a.uniforms.uResolution.value.set(e*i.getPixelRatio(),f*i.getPixelRatio())}function y(){n.dispose(),a.dispose()}function g(e){e.thickness!==void 0&&(a.uniforms.uThickness.value=e.thickness),e.scale!==void 0&&(a.uniforms.uScale.value=e.scale),e.speed!==void 0&&(a.uniforms.uSpeed.value=e.speed)}return{render:p,resize:h,dispose:y,setParams:g,background:m}}export{M as create,G as meta};
+`;function O({renderer:s,width:f,height:d,params:t={}}){const n=new S,v=new T(-1,1,1,-1,0,1),r=new D(2,2),a=new P({vertexShader:C,fragmentShader:G,depthTest:!1,depthWrite:!1,uniforms:{uResolution:{value:new l(f,d)},uTime:{value:0},uPointer:{value:new l(0,0)},uThickness:{value:t.thickness??.28},uScale:{value:t.scale??3},uSpeed:{value:t.speed??.12},uDetail:{value:t.detail??.12},uSteps:{value:t.steps??96},uHue:{value:t.hue??0},uGlow:{value:t.glow??.75}}}),c=new z(r,a);c.frustumCulled=!1,n.add(c);const o=new l(0,0),m=new R(263434);function p(e,u,i){a.uniforms.uTime.value=e;const w=i.active?i.x:0,k=i.active?i.y:0;o.x+=(w-o.x)*.05,o.y+=(k-o.y)*.05,a.uniforms.uPointer.value.copy(o),s.render(n,v)}function h(e,u){a.uniforms.uResolution.value.set(e*s.getPixelRatio(),u*s.getPixelRatio())}function g(){r.dispose(),a.dispose()}function y(e){e.thickness!==void 0&&(a.uniforms.uThickness.value=e.thickness),e.scale!==void 0&&(a.uniforms.uScale.value=e.scale),e.speed!==void 0&&(a.uniforms.uSpeed.value=e.speed),e.detail!==void 0&&(a.uniforms.uDetail.value=e.detail),e.steps!==void 0&&(a.uniforms.uSteps.value=e.steps),e.hue!==void 0&&(a.uniforms.uHue.value=e.hue),e.glow!==void 0&&(a.uniforms.uGlow.value=e.glow)}return{render:p,resize:h,dispose:g,setParams:y,background:m}}export{O as create,N as meta};

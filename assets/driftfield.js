@@ -1,4 +1,4 @@
-import{s as I,c as X,h as Z,p as J}from"./glsl.js";import{f as D,g as R,N as A,R as U,F as _,H as K,h as Q,O as Y,S as E,P as ee,c as x,V as S,M as te,i as ae,B as oe,j as q,b as se,A as ie,k as re,C as ne}from"./three.module.js";const ge={id:"driftfield",title:"Driftfield",tags:["gpgpu","ping-pong fbo","curl noise"],blurb:"A quarter-million particles whose positions live entirely in a floating-point texture. Each frame a fragment shader advects every one of them through a divergence-free curl-noise field and writes the result to a second texture, which becomes next frame’s input. The CPU never touches a particle.",stats:{particles:"262,144","sim passes/frame":"1","CPU work":"none"},params:{speed:{label:"Flow speed",type:"range",min:.05,max:1.4,step:.01,value:.48},scale:{label:"Noise scale",type:"range",min:.4,max:4,step:.01,value:1.75},size:{label:"Particle size",type:"range",min:2,max:11,step:.1,value:5.5},decay:{label:"Lifetime",type:"range",min:.03,max:.6,step:.01,value:.14}}},s=512,d=s*s,le=`
+import{s as J,c as K,h as Q,p as Y}from"./glsl.js";import{O as Z,S as E,P as ee,c as S,V as F,M as te,A as ae,f as oe,C as ie,g as B,h as H,N as L,R as N,F as W,H as se,i as re,B as le,j as q,b as ne,k as ue}from"./three.module.js";const Pe={id:"driftfield",title:"Driftfield",tags:["gpgpu","ping-pong fbo","curl noise"],blurb:"Up to a million particles whose positions live entirely in a floating-point texture. Each frame a fragment shader advects every one of them through a divergence-free curl-noise field and writes the result to a second texture, which becomes next frame’s input. The CPU never touches a particle.",stats:{"sim passes/frame":"1","CPU work":"none","CPU per particle":"zero"},params:{count:{label:"Particles",type:"select",structural:!0,value:512,options:[{label:"16,384",value:128},{label:"65,536",value:256},{label:"262,144",value:512},{label:"1,048,576",value:1024}]},speed:{label:"Flow speed",type:"range",min:.05,max:1.4,step:.01,value:.48},scale:{label:"Noise scale",type:"range",min:.4,max:4,step:.01,value:1.75},size:{label:"Particle size",type:"range",min:2,max:11,step:.1,value:5.5},decay:{label:"Lifetime",type:"range",min:.03,max:.6,step:.01,value:.14},force:{label:"Pointer push",type:"range",min:0,max:1.6,step:.01,value:.55},hue:{label:"Hue",type:"range",min:0,max:1,step:.005,value:0},exposure:{label:"Brightness",type:"range",min:.15,max:1.6,step:.01,value:.55}}},fe=`
   precision highp float;
 
   uniform sampler2D uPos;
@@ -12,9 +12,9 @@ import{s as I,c as X,h as Z,p as J}from"./glsl.js";import{f as D,g as R,N as A,R
 
   varying vec2 vUv;
 
-  ${I}
-  ${X}
-  ${Z}
+  ${J}
+  ${K}
+  ${Q}
 
   void main(){
     vec4 data  = texture2D(uPos, vUv);
@@ -46,18 +46,18 @@ import{s as I,c as X,h as Z,p as J}from"./glsl.js";import{f as D,g as R,N as A,R
 
     gl_FragColor = vec4(pos, life);
   }
-`,B=`
+`,V=`
   varying vec2 vUv;
   void main(){
     vUv = uv;
     gl_Position = vec4(position.xy, 0.0, 1.0);
   }
-`,ue=`
+`,ce=`
   precision highp float;
   uniform sampler2D uPos;
   varying vec2 vUv;
   void main(){ gl_FragColor = texture2D(uPos, vUv); }
-`,ce=`
+`,pe=`
   precision highp float;
 
   uniform sampler2D uPos;
@@ -82,14 +82,15 @@ import{s as I,c as X,h as Z,p as J}from"./glsl.js";import{f as D,g as R,N as A,R
     gl_Position = projectionMatrix * mv;
     gl_PointSize = uSize * uPixelRatio / max(-mv.z, 0.001);
   }
-`,fe=`
+`,ve=`
   precision highp float;
 
   uniform float uExposure;
+  uniform float uHue;
   varying float vSpeed;
   varying float vLife;
 
-  ${J}
+  ${Y}
 
   void main(){
     vec2 q = gl_PointCoord - 0.5;
@@ -97,7 +98,7 @@ import{s as I,c as X,h as Z,p as J}from"./glsl.js";import{f as D,g as R,N as A,R
     if (r2 > 0.25) discard;
 
     // Soft round sprite, no texture needed.
-    float sprite = (1.0 - smoothstep(0.0, 0.25, r2));
+    float sprite = 1.0 - smoothstep(0.0, 0.25, r2);
 
     // Fade in on spawn, out on death, so respawns never pop.
     float fade = (1.0 - smoothstep(0.82, 1.0, vLife)) * smoothstep(0.0, 0.18, vLife);
@@ -108,10 +109,10 @@ import{s as I,c as X,h as Z,p as J}from"./glsl.js";import{f as D,g as R,N as A,R
       vec3(0.34, 0.30, 0.44),
       vec3(0.42, 0.36, 0.44),
       vec3(1.00, 0.95, 0.85),
-      vec3(0.00, 0.18, 0.42)
+      vec3(0.00, 0.18, 0.42) + uHue
     );
     col += vec3(0.35, 0.55, 1.0) * pow(t, 3.0) * 0.8;
 
     gl_FragColor = vec4(col * uExposure, sprite * fade * 0.35);
   }
-`;function ye({renderer:t,width:L,height:W,params:m={}}){const F={type:!!t.getContext().getExtension("EXT_color_buffer_float")?_:K,format:U,minFilter:A,magFilter:A,depthBuffer:!1,stencilBuffer:!1,generateMipmaps:!1,wrapS:R,wrapT:R},i=[new D(s,s,F),new D(s,s,F)],f=new Float32Array(d*4);for(let e=0;e<d;e++){const r=Math.random()*2-1,n=Math.random()*Math.PI*2,u=Math.sqrt(1-r*r),c=.3+Math.random()*.6;f[e*4+0]=u*Math.cos(n)*c,f[e*4+1]=u*Math.sin(n)*c,f[e*4+2]=r*c,f[e*4+3]=Math.random()}const h=new Q(f,s,s,U,_);h.needsUpdate=!0;const z=new Y(-1,1,1,-1,0,1),P=new E,b=new ee(2,2),a=new x({vertexShader:B,fragmentShader:le,depthTest:!1,depthWrite:!1,uniforms:{uPos:{value:h},uTime:{value:0},uDt:{value:.016},uScale:{value:m.scale??1.75},uSpeed:{value:m.speed??.48},uDecay:{value:m.decay??.14},uPointer:{value:new S(999,999,999)},uPointerForce:{value:0}}}),g=new te(b,a);g.frustumCulled=!1,P.add(g);const M=new x({vertexShader:B,fragmentShader:ue,depthTest:!1,depthWrite:!1,uniforms:{uPos:{value:h}}}),V=t.autoClear;g.material=M;for(const e of i)t.setRenderTarget(e),t.render(P,z);t.setRenderTarget(null),t.autoClear=V,g.material=a;const T=new E,o=new ae(50,L/W,.1,100);o.position.set(0,0,3.1);const w=new Float32Array(d*2),j=new Float32Array(d*3);for(let e=0;e<d;e++)w[e*2+0]=(e%s+.5)/s,w[e*2+1]=(Math.floor(e/s)+.5)/s;const p=new oe;p.setAttribute("position",new q(j,3)),p.setAttribute("aRef",new q(w,2)),p.boundingSphere=new se(new S,4);const l=new x({vertexShader:ce,fragmentShader:fe,transparent:!0,depthWrite:!1,blending:ie,uniforms:{uPos:{value:i[0].texture},uPrevPos:{value:i[1].texture},uSize:{value:m.size??5.5},uPixelRatio:{value:t.getPixelRatio()},uExposure:{value:.55}}}),C=new re(p,l);C.frustumCulled=!1,T.add(C);let y=0;const v=new S(999,999,999),k=new ne(329227);function N(e,r,n){if(n.active){v.set(n.x,n.y,.5).unproject(o),v.sub(o.position).normalize();const H=-o.position.z/v.z;v.multiplyScalar(H).add(o.position),a.uniforms.uPointer.value.copy(v)}a.uniforms.uPointerForce.value+=((n.active?.55:0)-a.uniforms.uPointerForce.value)*.06,a.uniforms.uTime.value=e,a.uniforms.uDt.value=r;const u=1-y;a.uniforms.uPos.value=i[y].texture,t.setRenderTarget(i[u]),t.render(P,z),t.setRenderTarget(null),l.uniforms.uPos.value=i[u].texture,l.uniforms.uPrevPos.value=i[y].texture,y=u;const c=e*.07;o.position.x=Math.sin(c)*3.1,o.position.z=Math.cos(c)*3.1,o.position.y=Math.sin(e*.11)*.35,o.lookAt(0,0,0),t.render(T,o)}function G(e,r){o.aspect=e/r,o.updateProjectionMatrix(),l.uniforms.uPixelRatio.value=t.getPixelRatio()}function O(){i.forEach(e=>e.dispose()),h.dispose(),b.dispose(),p.dispose(),a.dispose(),M.dispose(),l.dispose()}function $(e){e.scale!==void 0&&(a.uniforms.uScale.value=e.scale),e.speed!==void 0&&(a.uniforms.uSpeed.value=e.speed),e.decay!==void 0&&(a.uniforms.uDecay.value=e.decay),e.size!==void 0&&(l.uniforms.uSize.value=e.size)}return{render:N,resize:G,dispose:O,setParams:$,background:k}}export{ye as create,ge as meta};
+`;function we({renderer:s,width:j,height:k,params:u={}}){const z={type:!!s.getContext().getExtension("EXT_color_buffer_float")?W:se,format:N,minFilter:L,magFilter:L,depthBuffer:!1,stencilBuffer:!1,generateMipmaps:!1,wrapS:H,wrapT:H},M=new Z(-1,1,1,-1,0,1),y=new E,T=new ee(2,2),r=new S({vertexShader:V,fragmentShader:fe,depthTest:!1,depthWrite:!1,uniforms:{uPos:{value:null},uTime:{value:0},uDt:{value:.016},uScale:{value:u.scale??1.75},uSpeed:{value:u.speed??.48},uDecay:{value:u.decay??.14},uPointer:{value:new F(999,999,999)},uPointerForce:{value:0}}}),P=new S({vertexShader:V,fragmentShader:ce,depthTest:!1,depthWrite:!1,uniforms:{uPos:{value:null}}}),h=new te(T,r);h.frustumCulled=!1,y.add(h);const l=new S({vertexShader:pe,fragmentShader:ve,transparent:!0,depthWrite:!1,blending:ae,uniforms:{uPos:{value:null},uPrevPos:{value:null},uSize:{value:u.size??5.5},uPixelRatio:{value:s.getPixelRatio()},uExposure:{value:u.exposure??.55},uHue:{value:u.hue??0}}}),w=new E,i=new oe(50,j/k,.1,100);i.position.set(0,0,3.1);let D=0,n=null,v=null,f=null,p=null,d=0;function R(){p&&w.remove(p),n?.forEach(e=>e.dispose()),v?.dispose(),f?.dispose(),n=null,v=null,f=null,p=null}function C(e){R(),D=e;const o=e*e;n=[new B(e,e,z),new B(e,e,z)];const a=new Float32Array(o*4);for(let t=0;t<o;t++){const x=Math.random()*2-1,A=Math.random()*Math.PI*2,_=Math.sqrt(1-x*x),b=.3+Math.random()*.6;a[t*4+0]=_*Math.cos(A)*b,a[t*4+1]=_*Math.sin(A)*b,a[t*4+2]=x*b,a[t*4+3]=Math.random()}v=new re(a,e,e,N,W),v.needsUpdate=!0,P.uniforms.uPos.value=v,h.material=P;for(const t of n)s.setRenderTarget(t),s.render(y,M);s.setRenderTarget(null),h.material=r;const c=new Float32Array(o*2),g=new Float32Array(o*3);for(let t=0;t<o;t++)c[t*2+0]=(t%e+.5)/e,c[t*2+1]=(Math.floor(t/e)+.5)/e;f=new le,f.setAttribute("position",new q(g,3)),f.setAttribute("aRef",new q(c,2)),f.boundingSphere=new ne(new F,4),p=new ue(f,l),p.frustumCulled=!1,w.add(p),d=0,l.uniforms.uPos.value=n[0].texture,l.uniforms.uPrevPos.value=n[1].texture}C(Number(u.count)||512);const m=new F(999,999,999),G=new ie(329227);let U=u.force??.55;function $(e,o,a){if(a.active){m.set(a.x,a.y,.5).unproject(i),m.sub(i.position).normalize();const t=-i.position.z/m.z;m.multiplyScalar(t).add(i.position),r.uniforms.uPointer.value.copy(m)}r.uniforms.uPointerForce.value+=((a.active?U:0)-r.uniforms.uPointerForce.value)*.06,r.uniforms.uTime.value=e,r.uniforms.uDt.value=o;const c=1-d;r.uniforms.uPos.value=n[d].texture,s.setRenderTarget(n[c]),s.render(y,M),s.setRenderTarget(null),l.uniforms.uPos.value=n[c].texture,l.uniforms.uPrevPos.value=n[d].texture,d=c;const g=e*.07;i.position.x=Math.sin(g)*3.1,i.position.z=Math.cos(g)*3.1,i.position.y=Math.sin(e*.11)*.35,i.lookAt(0,0,0),s.render(w,i)}function O(e){const o=r.uniforms;e.scale!==void 0&&(o.uScale.value=e.scale),e.speed!==void 0&&(o.uSpeed.value=e.speed),e.decay!==void 0&&(o.uDecay.value=e.decay),e.force!==void 0&&(U=e.force),e.size!==void 0&&(l.uniforms.uSize.value=e.size),e.hue!==void 0&&(l.uniforms.uHue.value=e.hue),e.exposure!==void 0&&(l.uniforms.uExposure.value=e.exposure);const a=Number(e.count);Number.isFinite(a)&&a!==D&&C(a)}function I(e,o){i.aspect=e/o,i.updateProjectionMatrix(),l.uniforms.uPixelRatio.value=s.getPixelRatio()}function X(){R(),T.dispose(),r.dispose(),P.dispose(),l.dispose()}return{render:$,resize:I,dispose:X,setParams:O,background:G}}export{we as create,Pe as meta};

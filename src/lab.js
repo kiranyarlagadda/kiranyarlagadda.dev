@@ -109,34 +109,66 @@ function buildControls(schema) {
     const readout = document.createElement('output');
     readout.className = 'control-value';
 
-    const input = document.createElement('input');
-    input.dataset.key = key;
+    const current = stage.getAttribute(key);
+    let input;
 
-    if (spec.type === 'color') {
+    if (spec.type === 'select') {
+      input = document.createElement('select');
+      input.className = 'control-select';
+      for (const option of spec.options) {
+        const el = document.createElement('option');
+        el.value = String(option.value);
+        el.textContent = option.label;
+        input.append(el);
+      }
+      input.value = current ?? String(spec.value);
+      readout.textContent = '';
+    } else if (spec.type === 'color') {
+      input = document.createElement('input');
       input.type = 'color';
-      input.value = stage.getAttribute(key) ?? spec.value;
+      input.value = current ?? spec.value;
       readout.textContent = input.value;
     } else if (spec.type === 'toggle') {
+      input = document.createElement('input');
       input.type = 'checkbox';
-      input.checked = (stage.getAttribute(key) ?? String(spec.value)) !== 'false';
+      input.checked = (current ?? String(spec.value)) !== 'false';
       readout.textContent = input.checked ? 'on' : 'off';
     } else {
+      input = document.createElement('input');
       input.type = 'range';
       input.min = spec.min;
       input.max = spec.max;
       input.step = spec.step ?? 0.01;
-      input.value = stage.getAttribute(key) ?? spec.value;
+      input.value = current ?? spec.value;
       readout.textContent = input.value;
     }
 
-    input.addEventListener('input', () => {
-      const value = spec.type === 'toggle' ? String(input.checked) : input.value;
-      readout.textContent = spec.type === 'toggle' ? (input.checked ? 'on' : 'off') : value;
-      // Setting the attribute is what drives the scene: the element watches
-      // its own attributes and forwards changes through setParams().
-      stage.setAttribute(key, value);
+    input.dataset.key = key;
+    if (spec.structural) row.classList.add('is-structural');
+
+    const readValue = () =>
+      spec.type === 'toggle' ? String(input.checked) : input.value;
+
+    const showValue = () => {
+      if (spec.type === 'toggle') readout.textContent = input.checked ? 'on' : 'off';
+      else if (spec.type !== 'select') readout.textContent = input.value;
+    };
+
+    const apply = () => {
+      // Setting the attribute is what drives the scene: the element watches its
+      // own attributes and forwards changes through setParams().
+      stage.setAttribute(key, readValue());
       updateSnippet();
-    });
+    };
+
+    if (spec.structural) {
+      // Rebuilding GPU buffers on every input event during a drag would stall.
+      // Track the number live, commit on release.
+      input.addEventListener('input', showValue);
+      input.addEventListener('change', () => { showValue(); apply(); });
+    } else {
+      input.addEventListener('input', () => { showValue(); apply(); });
+    }
 
     row.append(name, input, readout);
     return row;

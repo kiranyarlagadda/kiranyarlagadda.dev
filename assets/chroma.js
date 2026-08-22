@@ -1,4 +1,4 @@
-import{p as x,t as z,s as k,f as D}from"./glsl.js";import{S as q,i as C,l as P,c as S,V as T,M as A,C as M,d as R}from"./three.module.js";const $={id:"chroma",title:"Chroma",tags:["vertex displacement","analytic normals","iridescence"],blurb:"An icosphere pushed around by fractal noise in the vertex shader. The interesting part is the lighting: displacing vertices invalidates the mesh normals, so this resamples the displacement at two tangent-space neighbours and rebuilds the normal per vertex. Skip that and the whole thing shades like a smooth ball wearing a lumpy costume.",stats:{vertices:"194,940","noise taps/vertex":"21",normals:"recomputed"},params:{amp:{label:"Displacement",type:"range",min:.02,max:.6,step:.01,value:.28},freq:{label:"Noise frequency",type:"range",min:.4,max:4,step:.05,value:1.5},speed:{label:"Rotation",type:"range",min:0,max:.6,step:.01,value:.15}}},F=`
+import{p as D,t as S,s as q,f as C}from"./glsl.js";import{S as P,f as T,l as m,c as A,V as M,M as N,C as R,d as F}from"./three.module.js";const j={id:"chroma",title:"Chroma",tags:["vertex displacement","analytic normals","iridescence"],blurb:"An icosphere pushed around by fractal noise in the vertex shader. The interesting part is the lighting: displacing vertices invalidates the mesh normals, so this resamples the displacement at two tangent-space neighbours and rebuilds the normal per vertex. Skip that and the whole thing shades like a smooth ball wearing a lumpy costume.",stats:{"noise taps/vertex":"21",normals:"recomputed per vertex"},params:{amp:{label:"Displacement",type:"range",min:.02,max:.6,step:.01,value:.28},freq:{label:"Noise frequency",type:"range",min:.4,max:4,step:.05,value:1.5},speed:{label:"Rotation",type:"range",min:0,max:.6,step:.01,value:.15},detail:{label:"Mesh detail",type:"select",structural:!0,value:56,options:[{label:"3,840 verts",value:7},{label:"21,780 verts",value:32},{label:"194,940 verts",value:56},{label:"253,500 verts",value:64}]},hue:{label:"Hue",type:"range",min:0,max:1,step:.005,value:0},shine:{label:"Reflectivity",type:"range",min:0,max:1.6,step:.01,value:.85}}},H=`
   precision highp float;
 
   uniform float uTime;
@@ -10,8 +10,8 @@ import{p as x,t as z,s as k,f as D}from"./glsl.js";import{S as q,i as C,l as P,c
   varying vec3 vWorldPos;
   varying float vDisp;
 
-  ${k}
-  ${D}
+  ${q}
+  ${C}
 
   float displace(vec3 dir){
     vec3 q = dir * uFreq;
@@ -50,18 +50,20 @@ import{p as x,t as z,s as k,f as D}from"./glsl.js";import{S as q,i as C,l as P,c
 
     gl_Position = projectionMatrix * viewMatrix * world;
   }
-`,N=`
+`,V=`
   precision highp float;
 
   uniform vec3  uCameraPos;
   uniform float uTime;
+  uniform float uHue;
+  uniform float uShine;
 
   varying vec3 vNormal;
   varying vec3 vWorldPos;
   varying float vDisp;
 
-  ${x}
-  ${z}
+  ${D}
+  ${S}
 
   // Cheap procedural environment. Good enough to sell a reflection without
   // shipping a cubemap.
@@ -91,7 +93,7 @@ import{p as x,t as z,s as k,f as D}from"./glsl.js";import{S as q,i as C,l as P,c
       vec3(0.56, 0.54, 0.62),
       vec3(0.26, 0.24, 0.30),
       vec3(1.00, 1.00, 1.00),
-      vec3(0.02, 0.16, 0.32)
+      vec3(0.02, 0.16, 0.32) + uHue
     );
 
     vec3 keyDir = normalize(vec3(0.6, 0.8, 0.45));
@@ -102,7 +104,7 @@ import{p as x,t as z,s as k,f as D}from"./glsl.js";import{S as q,i as C,l as P,c
     vec3 env = environment(reflectDir);
 
     vec3 col = iridescence * (0.20 + 0.75 * diffuse);
-    col = mix(col, env * iridescence * 1.4, fresnel * 0.85);
+    col = mix(col, env * iridescence * 1.4, fresnel * uShine);
     col += vec3(1.0) * spec * 0.6;
 
     // Crevices go darker; ridges catch a little extra light.
@@ -113,4 +115,4 @@ import{p as x,t as z,s as k,f as D}from"./glsl.js";import{S as q,i as C,l as P,c
 
     gl_FragColor = vec4(col, 1.0);
   }
-`;function j({renderer:v,width:d,height:u,params:t={}}){const s=new q,o=new C(45,d/u,.1,100);o.position.set(0,0,3.4);const c=new P(1,56),i=new S({vertexShader:F,fragmentShader:N,uniforms:{uTime:{value:0},uAmp:{value:t.amp??.28},uFreq:{value:t.freq??1.5},uRadius:{value:1},uCameraPos:{value:new T}}}),n=new A(c,i);s.add(n);const a=new R(0,0);let l=t.speed??.15;const p=new M(395021);function f(e,m,r){i.uniforms.uTime.value=e;const w=r.active?r.x:0,b=r.active?r.y:0;a.x+=(w-a.x)*.05,a.y+=(b-a.y)*.05,n.rotation.y=e*l+a.x*.6,n.rotation.x=a.y*-.5,o.position.z=3.4,o.lookAt(0,0,0),i.uniforms.uCameraPos.value.copy(o.position),v.render(s,o)}function h(e,m){o.aspect=e/m,o.updateProjectionMatrix()}function g(){c.dispose(),i.dispose()}function y(e){e.amp!==void 0&&(i.uniforms.uAmp.value=e.amp),e.freq!==void 0&&(i.uniforms.uFreq.value=e.freq),e.speed!==void 0&&(l=e.speed)}return{render:f,resize:h,dispose:g,setParams:y,background:p}}export{j as create,$ as meta};
+`;function G({renderer:d,width:p,height:f,params:r={}}){const c=new P,o=new T(45,p/f,.1,100);o.position.set(0,0,3.4);let l=Number(r.detail)||56,u=new m(1,l);const i=new A({vertexShader:H,fragmentShader:V,uniforms:{uTime:{value:0},uAmp:{value:r.amp??.28},uFreq:{value:r.freq??1.5},uRadius:{value:1},uCameraPos:{value:new M},uHue:{value:r.hue??0},uShine:{value:r.shine??.85}}}),t=new N(u,i);c.add(t);function h(e){l=e;const a=t.geometry;t.geometry=new m(1,l),u=t.geometry,a.dispose()}const n=new F(0,0);let v=r.speed??.15;const g=new R(395021);function y(e,a,s){i.uniforms.uTime.value=e;const z=s.active?s.x:0,k=s.active?s.y:0;n.x+=(z-n.x)*.05,n.y+=(k-n.y)*.05,t.rotation.y=e*v+n.x*.6,t.rotation.x=n.y*-.5,o.position.z=3.4,o.lookAt(0,0,0),i.uniforms.uCameraPos.value.copy(o.position),d.render(c,o)}function b(e,a){o.aspect=e/a,o.updateProjectionMatrix()}function w(){t.geometry.dispose(),i.dispose()}function x(e){e.amp!==void 0&&(i.uniforms.uAmp.value=e.amp),e.freq!==void 0&&(i.uniforms.uFreq.value=e.freq),e.speed!==void 0&&(v=e.speed),e.hue!==void 0&&(i.uniforms.uHue.value=e.hue),e.shine!==void 0&&(i.uniforms.uShine.value=e.shine);const a=Number(e.detail);Number.isFinite(a)&&a!==l&&h(a)}return{render:y,resize:b,dispose:w,setParams:x,background:g}}export{G as create,j as meta};

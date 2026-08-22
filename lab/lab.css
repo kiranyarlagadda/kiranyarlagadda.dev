@@ -330,3 +330,33 @@ kbd {
 @media (max-width: 1040px) {
   .panel { display: none; }
 }
+
+.control-select {
+  grid-area: input;
+  width: 100%;
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.28rem 0.5rem;
+  cursor: pointer;
+}
+.control-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Structural knobs rebuild GPU buffers, so they commit on release rather than
+   while dragging. The marker explains why they behave differently. */
+.control.is-structural .control-label::after {
+  content: ' (rebuilds)';
+  color: var(--ink-faint);
+  font-size: 0.66rem;
+}
+
+/* A select has no numeric readout, so let the label use the full width. */
+.control:has(.control-select) {
+  grid-template-columns: 1fr;
+  grid-template-areas: 'label' 'input';
+}
+.control:has(.control-select) .control-value { display: none; }

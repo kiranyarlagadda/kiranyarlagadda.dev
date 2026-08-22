@@ -8,7 +8,7 @@
     "watch": "vite build --watch"
   },
   "dependencies": {
-    "element-lab": "github:kiranyarlagadda/element-lab#v0.2.1",
+    "element-lab": "github:kiranyarlagadda/element-lab#v0.3.1",
     "three": "^0.185.1"
   },
   "devDependencies": {

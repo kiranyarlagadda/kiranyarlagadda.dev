@@ -1,4 +1,4 @@
-import{p as k,s as T,f as L}from"./glsl.js";import{S as H,i as B,P as F,I,a as y,b as V,V as i,c as $,A as j,M as G,C as U,d as W,m as _,n as q}from"./three.module.js";const Q={id:"lattice",title:"Lattice",tags:["instancing","one draw call","hero background"],blurb:"Eighteen thousand billboarded dots drawn in a single instanced call. Height, scale and colour all come out of one fbm field evaluated in the vertex shader, with a travelling swell that follows the pointer. This is the one that actually belongs behind a hero headline. It stays legible under text and costs a single draw call.",stats:{instances:"18,000","draw calls":"1","CPU per frame":"3 uniforms"},params:{amp:{label:"Swell height",type:"range",min:.1,max:4,step:.05,value:1.5},size:{label:"Dot size",type:"range",min:.04,max:.32,step:.005,value:.135},speed:{label:"Drift speed",type:"range",min:0,max:.6,step:.01,value:.16}}},u=180,P=100,l=u*P,E=`
+import{p as T,s as I,f as L}from"./glsl.js";import{S as N,f as B,P as V,I as x,c as G,V as d,A as $,M as j,C as _,a as S,b as q,d as E,m as U,n as W}from"./three.module.js";const Y={id:"lattice",title:"Lattice",tags:["instancing","one draw call","hero background"],blurb:"Eighteen thousand billboarded dots drawn in a single instanced call. Height, scale and colour all come out of one fbm field evaluated in the vertex shader, with a travelling swell that follows the pointer. This is the one that actually belongs behind a hero headline. It stays legible under text and costs a single draw call.",stats:{"draw calls":"1","CPU per frame":"3 uniforms"},params:{amp:{label:"Swell height",type:"range",min:.1,max:4,step:.05,value:1.5},size:{label:"Dot size",type:"range",min:.04,max:.32,step:.005,value:.135},speed:{label:"Drift speed",type:"range",min:0,max:.6,step:.01,value:.16},density:{label:"Grid density",type:"select",structural:!0,value:180,options:[{label:"4,500 dots",value:90},{label:"18,000 dots",value:180},{label:"40,500 dots",value:270},{label:"72,000 dots",value:360}]},spacing:{label:"Spacing",type:"range",min:.12,max:.5,step:.005,value:.26},hue:{label:"Hue",type:"range",min:0,max:1,step:.005,value:0}}},J=`
   precision highp float;
 
   uniform float uTime;
@@ -15,7 +15,7 @@ import{p as k,s as T,f as L}from"./glsl.js";import{S as H,i as B,P as F,I,a as y
   varying float vRand;
   varying vec2  vLocal;
 
-  ${T}
+  ${I}
   ${L}
 
   void main(){
@@ -44,16 +44,17 @@ import{p as k,s as T,f as L}from"./glsl.js";import{S as H,i as B,P as F,I,a as y
 
     gl_Position = projectionMatrix * mv;
   }
-`,N=`
+`,K=`
   precision highp float;
 
   uniform float uTime;
+  uniform float uHue;
 
   varying float vHeight;
   varying float vRand;
   varying vec2  vLocal;
 
-  ${k}
+  ${T}
 
   void main(){
     // Round the quad off into a soft disc.
@@ -68,7 +69,7 @@ import{p as k,s as T,f as L}from"./glsl.js";import{S as H,i as B,P as F,I,a as y
       vec3(0.28, 0.30, 0.40),
       vec3(0.32, 0.34, 0.40),
       vec3(0.90, 0.85, 0.80),
-      vec3(0.10, 0.28, 0.52)
+      vec3(0.10, 0.28, 0.52) + uHue
     );
 
     // Crests pick up a cool highlight, troughs sink toward the background.
@@ -77,4 +78,4 @@ import{p as k,s as T,f as L}from"./glsl.js";import{S as H,i as B,P as F,I,a as y
 
     gl_FragColor = vec4(col, alpha * mix(0.35, 1.0, t));
   }
-`;function X({renderer:x,width:A,height:S,params:c={}}){const d=new H,t=new B(38,A/S,.1,200);t.position.set(0,-14,13),t.lookAt(0,1.5,0);const s=new F(1,1),a=new I;a.index=s.index,a.attributes.position=s.attributes.position,a.attributes.uv=s.attributes.uv,a.instanceCount=l;const f=new Float32Array(l*2),m=new Float32Array(l),v=.26;for(let e=0;e<l;e++){const r=e%u,n=Math.floor(e/u);f[e*2+0]=(r-u/2)*v,f[e*2+1]=(n-P/2)*v,m[e]=Math.random()}a.setAttribute("aOffset",new y(f,2)),a.setAttribute("aRand",new y(m,1)),a.boundingSphere=new V(new i,60);const o=new $({vertexShader:E,fragmentShader:N,transparent:!0,depthWrite:!1,blending:j,uniforms:{uTime:{value:0},uPointer:{value:new i(0,0,0)},uPointerAmount:{value:0},uAmp:{value:c.amp??1.5},uDotSize:{value:c.size??.135},uDrift:{value:c.speed??.16}}}),p=new G(a,o);p.frustumCulled=!1,d.add(p);const h=new _,z=new q(new i(0,0,1),0),g=new i,b=new i(0,0,0),w=new W,C=new U(263434);function R(e,r,n){o.uniforms.uTime.value=e,n.active&&(w.set(n.x,n.y),h.setFromCamera(w,t),h.ray.intersectPlane(z,g)&&b.lerp(g,.08)),o.uniforms.uPointer.value.copy(b),o.uniforms.uPointerAmount.value+=((n.active?1:0)-o.uniforms.uPointerAmount.value)*.05,t.position.x=Math.sin(e*.09)*1.6,t.position.y=-14+Math.cos(e*.07)*.8,t.lookAt(0,1.5,0),x.render(d,t)}function D(e,r){t.aspect=e/r,t.updateProjectionMatrix()}function M(){s.dispose(),a.dispose(),o.dispose()}function O(e){e.amp!==void 0&&(o.uniforms.uAmp.value=e.amp),e.size!==void 0&&(o.uniforms.uDotSize.value=e.size),e.speed!==void 0&&(o.uniforms.uDrift.value=e.speed)}return{render:R,resize:D,dispose:M,setParams:O,background:C}}export{X as create,Q as meta};
+`;function Z({renderer:C,width:M,height:z,params:l={}}){const g=new N,i=new B(38,M/z,.1,200);i.position.set(0,-14,13),i.lookAt(0,1.5,0);let s=Number(l.density)||180,p=Math.round(s*100/180),r=l.spacing??.26;const m=new V(1,1);let v=new x;function b(e){const a=s*p,t=new Float32Array(a*2),c=new Float32Array(a);for(let o=0;o<a;o++){const h=o%s,f=Math.floor(o/s);t[o*2+0]=(h-s/2)*r,t[o*2+1]=(f-p/2)*r,c[o]=Math.random()}e.index=m.index,e.attributes.position=m.attributes.position,e.attributes.uv=m.attributes.uv,e.instanceCount=a,e.setAttribute("aOffset",new S(t,2)),e.setAttribute("aRand",new S(c,1)),e.boundingSphere=new q(new d,200)}b(v);const n=new G({vertexShader:J,fragmentShader:K,transparent:!0,depthWrite:!1,blending:$,uniforms:{uTime:{value:0},uPointer:{value:new d(0,0,0)},uPointerAmount:{value:0},uAmp:{value:l.amp??1.5},uDotSize:{value:l.size??.135},uDrift:{value:l.speed??.16},uHue:{value:l.hue??0}}}),u=new j(v,n);u.frustumCulled=!1,g.add(u);const w=new U,D=new W(new d(0,0,1),0),y=new d,P=new d(0,0,0),A=new E,H=new _(263434);function R(e,a,t){n.uniforms.uTime.value=e,t.active&&(A.set(t.x,t.y),w.setFromCamera(A,i),w.ray.intersectPlane(D,y)&&P.lerp(y,.08)),n.uniforms.uPointer.value.copy(P),n.uniforms.uPointerAmount.value+=((t.active?1:0)-n.uniforms.uPointerAmount.value)*.05,i.position.x=Math.sin(e*.09)*1.6,i.position.y=-14+Math.cos(e*.07)*.8,i.lookAt(0,1.5,0),C.render(g,i)}function k(e,a){i.aspect=e/a,i.updateProjectionMatrix()}function F(){m.dispose(),u.geometry.dispose(),n.dispose()}function O(e){e.amp!==void 0&&(n.uniforms.uAmp.value=e.amp),e.size!==void 0&&(n.uniforms.uDotSize.value=e.size),e.speed!==void 0&&(n.uniforms.uDrift.value=e.speed),e.hue!==void 0&&(n.uniforms.uHue.value=e.hue);const a=Number(e.density),t=e.spacing===void 0?r:Number(e.spacing),c=Number.isFinite(a)&&a!==s,o=Number.isFinite(t)&&t!==r;if(c||o){c&&(s=a,p=Math.round(s*100/180)),o&&(r=t);const h=u.geometry,f=new x;b(f),u.geometry=f,v=f,h.dispose()}}return{render:R,resize:k,dispose:F,setParams:O,background:H}}export{Z as create,Y as meta};
