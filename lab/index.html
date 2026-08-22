@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Element Lab | Kiran Yarlagadda</title>
+    <meta
+      name="description"
+      content="Custom WebGL elements, each one a hand-written GLSL shader wrapped in a drop-in HTML tag."
+    />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="/lab/lab.css" />
+  </head>
+  <body>
+    <!-- The whole demo is this one tag. Everything else on the page is chrome. -->
+    <lab-scene name="driftfield"></lab-scene>
+
+    <div class="scrim"></div>
+
+    <header class="topbar">
+      <a class="brand" href="/projects.html">
+        <span class="dot" aria-hidden="true"></span>
+        <span>element<b>lab</b></span>
+      </a>
+      <nav id="tabs" class="tabs" aria-label="Scenes"></nav>
+      <output id="perf" class="perf" aria-label="frames per second">--</output>
+    </header>
+
+    <section class="readout">
+      <h1 id="title">&mdash;</h1>
+      <p id="blurb">&mdash;</p>
+      <ul id="tags" class="tags" role="list"></ul>
+      <dl id="stats" class="stats"></dl>
+    </section>
+
+    <footer class="hint">
+      <kbd>&larr;</kbd><kbd>&rarr;</kbd> switch &middot; move the pointer &middot;
+      every scene is a hand-written GLSL shader in one <code>&lt;lab-scene&gt;</code> tag
+    </footer>
+
+    <script type="module" src="/assets/lab.js"></script>
+  </body>
+</html>

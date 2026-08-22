@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Projects | Kiran Yarlagadda</title>
+    <meta
+      name="description"
+      content="Things Kiran Yarlagadda has built."
+    />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="/projects.css" />
+  </head>
+  <body>
+    <!-- Painted by assets/cards.js. Purely decorative, so it is hidden from AT
+         and never intercepts pointer events. -->
+    <canvas id="cards-gl" aria-hidden="true"></canvas>
+
+    <header class="masthead">
+      <a class="back" href="/">
+        <span aria-hidden="true">&larr;</span> Kiran Yarlagadda
+      </a>
+      <h1>Projects</h1>
+      <p class="standfirst">
+        A running list of things I have built.
+      </p>
+    </header>
+
+    <main>
+      <!-- To add a project: copy one <li> block. data-hue shifts that card's
+           backdrop colour (0-1). Nothing else needs changing. -->
+      <ul class="grid" role="list">
+        <li>
+          <article class="card" data-card data-hue="0.62">
+            <h2>Element Lab</h2>
+            <p>
+              A growing set of WebGL scenes, each wrapped in a drop-in HTML tag.
+              Write <code>&lt;lab-scene name="driftfield"&gt;</code> and it runs.
+              So far there are five: a quarter-million particles simulated entirely
+              on the GPU, a raymarched surface with no geometry in it at all, a
+              noise-displaced mesh that rebuilds its own normals, an instanced field
+              built to sit behind a headline, and an orrery that puts the planets
+              where they actually are today using NASA/JPL orbital data.
+            </p>
+            <ul class="tech" role="list">
+              <li>Three.js</li>
+              <li>GLSL</li>
+              <li>Web Components</li>
+            </ul>
+            <p class="actions">
+              <a class="primary" href="/lab/">Open the lab</a>
+              <a href="https://github.com/kiranyarlagadda/element-lab">Source</a>
+            </p>
+          </article>
+        </li>
+      </ul>
+    </main>
+
+    <footer class="foot">
+      <p>
+        More on <a href="https://github.com/kiranyarlagadda">GitHub</a> and
+        <a href="https://www.linkedin.com/in/kiran-yarlagadda">LinkedIn</a>.
+      </p>
+    </footer>
+
+    <script type="module">
+      // The card backdrop is fundamentally a hover effect, and touch devices
+      // cannot hover. Loading it there costs ~125 KB over cellular and a
+      // continuous render loop against the battery, to animate something nobody
+      // can trigger. Gate the import so phones never pay for it -- the CSS
+      // fallback surface is what they get, and it is what the cards are
+      // designed to look like anyway.
+      if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        import('/assets/cards.js');
+      }
+    </script>
+  </body>
+</html>
