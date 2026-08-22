@@ -1,20 +1,23 @@
-import{p as w,t as x}from"./glsl.js";import{S as k,O as b,P,c as T,d as r,M as z,C as S}from"./three.module.js";const O={id:"gyroid",title:"Gyroid",tags:["raymarching","sdf","no geometry"],blurb:"There is no mesh in this scene. Two triangles cover the screen and a fragment shader walks a ray through a distance field for every pixel, solving a gyroid minimal surface analytically. Normals, soft shadows and ambient occlusion are all derived from the same distance function.",stats:{triangles:"2","max ray steps":"96",geometry:"implicit"}},D=`
+import{p as x,t as b}from"./glsl.js";import{S,O as T,P,c as z,d as c,M as D,C}from"./three.module.js";const G={id:"gyroid",title:"Gyroid",tags:["raymarching","sdf","no geometry"],blurb:"There is no mesh in this scene. Two triangles cover the screen and a fragment shader walks a ray through a distance field for every pixel, solving a gyroid minimal surface analytically. Normals, soft shadows and ambient occlusion are all derived from the same distance function.",stats:{triangles:"2","max ray steps":"96",geometry:"implicit"},params:{thickness:{label:"Wall thickness",type:"range",min:.08,max:.6,step:.01,value:.28},scale:{label:"Lattice scale",type:"range",min:1.5,max:6,step:.05,value:3},speed:{label:"Rotation",type:"range",min:0,max:.5,step:.01,value:.12}}},R=`
   varying vec2 vUv;
   void main(){
     vUv = uv;
     gl_Position = vec4(position.xy, 0.0, 1.0);
   }
-`,C=`
+`,N=`
   precision highp float;
 
   uniform vec2  uResolution;
   uniform float uTime;
   uniform vec2  uPointer;
+  uniform float uThickness;
+  uniform float uScale;
+  uniform float uSpeed;
 
   varying vec2 vUv;
 
-  ${w}
   ${x}
+  ${b}
 
   mat2 rot(float a){ float s = sin(a), c = cos(a); return mat2(c, -s, s, c); }
 
@@ -27,15 +30,15 @@ import{p as w,t as x}from"./glsl.js";import{S as k,O as b,P,c as T,d as r,M as z
   }
 
   float map(vec3 p){
-    p.xz *= rot(uTime * 0.12);
-    p.xy *= rot(uTime * 0.08);
+    p.xz *= rot(uTime * uSpeed);
+    p.xy *= rot(uTime * uSpeed * 0.66);
 
     // Carve the infinite lattice down to a rounded blob.
     float shell = length(p) - 1.25;
 
     // Two octaves at different frequencies read as fine detail on coarse structure.
-    float coarse = gyroid(p, 3.0, 0.28);
-    float fine   = gyroid(p, 9.7, 0.20);
+    float coarse = gyroid(p, uScale, uThickness);
+    float fine   = gyroid(p, uScale * 3.23, uThickness * 0.71);
 
     float surface = coarse - fine * 0.12;
 
@@ -146,4 +149,4 @@ import{p as w,t as x}from"./glsl.js";import{S as k,O as b,P,c as T,d as r,M as z
 
     gl_FragColor = vec4(col, 1.0);
   }
-`;function F({renderer:o,width:f,height:v}){const c=new k,d=new b(-1,1,1,-1,0,1),s=new P(2,2),e=new T({vertexShader:D,fragmentShader:C,depthTest:!1,depthWrite:!1,uniforms:{uResolution:{value:new r(f,v)},uTime:{value:0},uPointer:{value:new r(0,0)}}}),n=new z(s,e);n.frustumCulled=!1,c.add(n);const t=new r(0,0),m=new S(263434);function u(i,l,a){e.uniforms.uTime.value=i;const y=a.active?a.x:0,g=a.active?a.y:0;t.x+=(y-t.x)*.05,t.y+=(g-t.y)*.05,e.uniforms.uPointer.value.copy(t),o.render(c,d)}function h(i,l){e.uniforms.uResolution.value.set(i*o.getPixelRatio(),l*o.getPixelRatio())}function p(){s.dispose(),e.dispose()}return{render:u,resize:h,dispose:p,background:m}}export{F as create,O as meta};
+`;function M({renderer:i,width:u,height:d,params:s={}}){const r=new S,v=new T(-1,1,1,-1,0,1),n=new P(2,2),a=new z({vertexShader:R,fragmentShader:N,depthTest:!1,depthWrite:!1,uniforms:{uResolution:{value:new c(u,d)},uTime:{value:0},uPointer:{value:new c(0,0)},uThickness:{value:s.thickness??.28},uScale:{value:s.scale??3},uSpeed:{value:s.speed??.12}}}),l=new D(n,a);l.frustumCulled=!1,r.add(l);const t=new c(0,0),m=new C(263434);function p(e,f,o){a.uniforms.uTime.value=e;const w=o.active?o.x:0,k=o.active?o.y:0;t.x+=(w-t.x)*.05,t.y+=(k-t.y)*.05,a.uniforms.uPointer.value.copy(t),i.render(r,v)}function h(e,f){a.uniforms.uResolution.value.set(e*i.getPixelRatio(),f*i.getPixelRatio())}function y(){n.dispose(),a.dispose()}function g(e){e.thickness!==void 0&&(a.uniforms.uThickness.value=e.thickness),e.scale!==void 0&&(a.uniforms.uScale.value=e.scale),e.speed!==void 0&&(a.uniforms.uSpeed.value=e.speed)}return{render:p,resize:h,dispose:y,setParams:g,background:m}}export{M as create,G as meta};

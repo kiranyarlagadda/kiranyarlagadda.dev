@@ -1,4 +1,4 @@
-import{s as $,c as H,h as I,p as X}from"./glsl.js";import{f as z,g as D,N as R,R as A,F as U,H as Z,h as J,O as K,S as _,P as Q,c as x,V as y,M as Y,i as ee,B as te,j as E,b as oe,A as ae,k as se,C as ie}from"./three.module.js";const me={id:"driftfield",title:"Driftfield",tags:["gpgpu","ping-pong fbo","curl noise"],blurb:"A quarter-million particles whose positions live entirely in a floating-point texture. Each frame a fragment shader advects every one of them through a divergence-free curl-noise field and writes the result to a second texture, which becomes next frame’s input. The CPU never touches a particle.",stats:{particles:"262,144","sim passes/frame":"1","CPU work":"none"}},a=512,d=a*a,re=`
+import{s as I,c as X,h as Z,p as J}from"./glsl.js";import{f as D,g as R,N as A,R as U,F as _,H as K,h as Q,O as Y,S as E,P as ee,c as x,V as S,M as te,i as ae,B as oe,j as q,b as se,A as ie,k as re,C as ne}from"./three.module.js";const ge={id:"driftfield",title:"Driftfield",tags:["gpgpu","ping-pong fbo","curl noise"],blurb:"A quarter-million particles whose positions live entirely in a floating-point texture. Each frame a fragment shader advects every one of them through a divergence-free curl-noise field and writes the result to a second texture, which becomes next frame’s input. The CPU never touches a particle.",stats:{particles:"262,144","sim passes/frame":"1","CPU work":"none"},params:{speed:{label:"Flow speed",type:"range",min:.05,max:1.4,step:.01,value:.48},scale:{label:"Noise scale",type:"range",min:.4,max:4,step:.01,value:1.75},size:{label:"Particle size",type:"range",min:2,max:11,step:.1,value:5.5},decay:{label:"Lifetime",type:"range",min:.03,max:.6,step:.01,value:.14}}},s=512,d=s*s,le=`
   precision highp float;
 
   uniform sampler2D uPos;
@@ -12,9 +12,9 @@ import{s as $,c as H,h as I,p as X}from"./glsl.js";import{f as z,g as D,N as R,R
 
   varying vec2 vUv;
 
-  ${$}
-  ${H}
   ${I}
+  ${X}
+  ${Z}
 
   void main(){
     vec4 data  = texture2D(uPos, vUv);
@@ -46,18 +46,18 @@ import{s as $,c as H,h as I,p as X}from"./glsl.js";import{f as z,g as D,N as R,R
 
     gl_FragColor = vec4(pos, life);
   }
-`,q=`
+`,B=`
   varying vec2 vUv;
   void main(){
     vUv = uv;
     gl_Position = vec4(position.xy, 0.0, 1.0);
   }
-`,ne=`
+`,ue=`
   precision highp float;
   uniform sampler2D uPos;
   varying vec2 vUv;
   void main(){ gl_FragColor = texture2D(uPos, vUv); }
-`,le=`
+`,ce=`
   precision highp float;
 
   uniform sampler2D uPos;
@@ -82,14 +82,14 @@ import{s as $,c as H,h as I,p as X}from"./glsl.js";import{f as z,g as D,N as R,R
     gl_Position = projectionMatrix * mv;
     gl_PointSize = uSize * uPixelRatio / max(-mv.z, 0.001);
   }
-`,ue=`
+`,fe=`
   precision highp float;
 
   uniform float uExposure;
   varying float vSpeed;
   varying float vLife;
 
-  ${X}
+  ${J}
 
   void main(){
     vec2 q = gl_PointCoord - 0.5;
@@ -114,4 +114,4 @@ import{s as $,c as H,h as I,p as X}from"./glsl.js";import{f as z,g as D,N as R,R
 
     gl_FragColor = vec4(col * uExposure, sprite * fade * 0.35);
   }
-`;function he({renderer:t,width:B,height:W}){const S={type:!!t.getContext().getExtension("EXT_color_buffer_float")?U:Z,format:A,minFilter:R,magFilter:R,depthBuffer:!1,stencilBuffer:!1,generateMipmaps:!1,wrapS:D,wrapT:D},i=[new z(a,a,S),new z(a,a,S)],c=new Float32Array(d*4);for(let e=0;e<d;e++){const r=Math.random()*2-1,n=Math.random()*Math.PI*2,l=Math.sqrt(1-r*r),u=.3+Math.random()*.6;c[e*4+0]=l*Math.cos(n)*u,c[e*4+1]=l*Math.sin(n)*u,c[e*4+2]=r*u,c[e*4+3]=Math.random()}const m=new J(c,a,a,A,U);m.needsUpdate=!0;const F=new K(-1,1,1,-1,0,1),w=new _,M=new Q(2,2),s=new x({vertexShader:q,fragmentShader:re,depthTest:!1,depthWrite:!1,uniforms:{uPos:{value:m},uTime:{value:0},uDt:{value:.016},uScale:{value:1.75},uSpeed:{value:.48},uDecay:{value:.14},uPointer:{value:new y(999,999,999)},uPointerForce:{value:0}}}),h=new Y(M,s);h.frustumCulled=!1,w.add(h);const T=new x({vertexShader:q,fragmentShader:ne,depthTest:!1,depthWrite:!1,uniforms:{uPos:{value:m}}}),L=t.autoClear;h.material=T;for(const e of i)t.setRenderTarget(e),t.render(w,F);t.setRenderTarget(null),t.autoClear=L,h.material=s;const b=new _,o=new ee(50,B/W,.1,100);o.position.set(0,0,3.1);const P=new Float32Array(d*2),V=new Float32Array(d*3);for(let e=0;e<d;e++)P[e*2+0]=(e%a+.5)/a,P[e*2+1]=(Math.floor(e/a)+.5)/a;const f=new te;f.setAttribute("position",new E(V,3)),f.setAttribute("aRef",new E(P,2)),f.boundingSphere=new oe(new y,4);const p=new x({vertexShader:le,fragmentShader:ue,transparent:!0,depthWrite:!1,blending:ae,uniforms:{uPos:{value:i[0].texture},uPrevPos:{value:i[1].texture},uSize:{value:5.5},uPixelRatio:{value:t.getPixelRatio()},uExposure:{value:.55}}}),C=new se(f,p);C.frustumCulled=!1,b.add(C);let g=0;const v=new y(999,999,999),j=new ie(329227);function k(e,r,n){if(n.active){v.set(n.x,n.y,.5).unproject(o),v.sub(o.position).normalize();const O=-o.position.z/v.z;v.multiplyScalar(O).add(o.position),s.uniforms.uPointer.value.copy(v)}s.uniforms.uPointerForce.value+=((n.active?.55:0)-s.uniforms.uPointerForce.value)*.06,s.uniforms.uTime.value=e,s.uniforms.uDt.value=r;const l=1-g;s.uniforms.uPos.value=i[g].texture,t.setRenderTarget(i[l]),t.render(w,F),t.setRenderTarget(null),p.uniforms.uPos.value=i[l].texture,p.uniforms.uPrevPos.value=i[g].texture,g=l;const u=e*.07;o.position.x=Math.sin(u)*3.1,o.position.z=Math.cos(u)*3.1,o.position.y=Math.sin(e*.11)*.35,o.lookAt(0,0,0),t.render(b,o)}function G(e,r){o.aspect=e/r,o.updateProjectionMatrix(),p.uniforms.uPixelRatio.value=t.getPixelRatio()}function N(){i.forEach(e=>e.dispose()),m.dispose(),M.dispose(),f.dispose(),s.dispose(),T.dispose(),p.dispose()}return{render:k,resize:G,dispose:N,background:j}}export{he as create,me as meta};
+`;function ye({renderer:t,width:L,height:W,params:m={}}){const F={type:!!t.getContext().getExtension("EXT_color_buffer_float")?_:K,format:U,minFilter:A,magFilter:A,depthBuffer:!1,stencilBuffer:!1,generateMipmaps:!1,wrapS:R,wrapT:R},i=[new D(s,s,F),new D(s,s,F)],f=new Float32Array(d*4);for(let e=0;e<d;e++){const r=Math.random()*2-1,n=Math.random()*Math.PI*2,u=Math.sqrt(1-r*r),c=.3+Math.random()*.6;f[e*4+0]=u*Math.cos(n)*c,f[e*4+1]=u*Math.sin(n)*c,f[e*4+2]=r*c,f[e*4+3]=Math.random()}const h=new Q(f,s,s,U,_);h.needsUpdate=!0;const z=new Y(-1,1,1,-1,0,1),P=new E,b=new ee(2,2),a=new x({vertexShader:B,fragmentShader:le,depthTest:!1,depthWrite:!1,uniforms:{uPos:{value:h},uTime:{value:0},uDt:{value:.016},uScale:{value:m.scale??1.75},uSpeed:{value:m.speed??.48},uDecay:{value:m.decay??.14},uPointer:{value:new S(999,999,999)},uPointerForce:{value:0}}}),g=new te(b,a);g.frustumCulled=!1,P.add(g);const M=new x({vertexShader:B,fragmentShader:ue,depthTest:!1,depthWrite:!1,uniforms:{uPos:{value:h}}}),V=t.autoClear;g.material=M;for(const e of i)t.setRenderTarget(e),t.render(P,z);t.setRenderTarget(null),t.autoClear=V,g.material=a;const T=new E,o=new ae(50,L/W,.1,100);o.position.set(0,0,3.1);const w=new Float32Array(d*2),j=new Float32Array(d*3);for(let e=0;e<d;e++)w[e*2+0]=(e%s+.5)/s,w[e*2+1]=(Math.floor(e/s)+.5)/s;const p=new oe;p.setAttribute("position",new q(j,3)),p.setAttribute("aRef",new q(w,2)),p.boundingSphere=new se(new S,4);const l=new x({vertexShader:ce,fragmentShader:fe,transparent:!0,depthWrite:!1,blending:ie,uniforms:{uPos:{value:i[0].texture},uPrevPos:{value:i[1].texture},uSize:{value:m.size??5.5},uPixelRatio:{value:t.getPixelRatio()},uExposure:{value:.55}}}),C=new re(p,l);C.frustumCulled=!1,T.add(C);let y=0;const v=new S(999,999,999),k=new ne(329227);function N(e,r,n){if(n.active){v.set(n.x,n.y,.5).unproject(o),v.sub(o.position).normalize();const H=-o.position.z/v.z;v.multiplyScalar(H).add(o.position),a.uniforms.uPointer.value.copy(v)}a.uniforms.uPointerForce.value+=((n.active?.55:0)-a.uniforms.uPointerForce.value)*.06,a.uniforms.uTime.value=e,a.uniforms.uDt.value=r;const u=1-y;a.uniforms.uPos.value=i[y].texture,t.setRenderTarget(i[u]),t.render(P,z),t.setRenderTarget(null),l.uniforms.uPos.value=i[u].texture,l.uniforms.uPrevPos.value=i[y].texture,y=u;const c=e*.07;o.position.x=Math.sin(c)*3.1,o.position.z=Math.cos(c)*3.1,o.position.y=Math.sin(e*.11)*.35,o.lookAt(0,0,0),t.render(T,o)}function G(e,r){o.aspect=e/r,o.updateProjectionMatrix(),l.uniforms.uPixelRatio.value=t.getPixelRatio()}function O(){i.forEach(e=>e.dispose()),h.dispose(),b.dispose(),p.dispose(),a.dispose(),M.dispose(),l.dispose()}function $(e){e.scale!==void 0&&(a.uniforms.uScale.value=e.scale),e.speed!==void 0&&(a.uniforms.uSpeed.value=e.speed),e.decay!==void 0&&(a.uniforms.uDecay.value=e.decay),e.size!==void 0&&(l.uniforms.uSize.value=e.size)}return{render:N,resize:G,dispose:O,setParams:$,background:k}}export{ye as create,ge as meta};

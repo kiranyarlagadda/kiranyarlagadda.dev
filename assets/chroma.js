@@ -1,4 +1,4 @@
-import{p as y,t as w,s as x,f as b}from"./glsl.js";import{S as z,i as k,l as D,c as C,V as P,M as S,C as T,d as A}from"./three.module.js";const F={id:"chroma",title:"Chroma",tags:["vertex displacement","analytic normals","iridescence"],blurb:"An icosphere pushed around by fractal noise in the vertex shader. The interesting part is the lighting: displacing vertices invalidates the mesh normals, so this resamples the displacement at two tangent-space neighbours and rebuilds the normal per vertex. Skip that and the whole thing shades like a smooth ball wearing a lumpy costume.",stats:{vertices:"194,940","noise taps/vertex":"21",normals:"recomputed"}},M=`
+import{p as x,t as z,s as k,f as D}from"./glsl.js";import{S as q,i as C,l as P,c as S,V as T,M as A,C as M,d as R}from"./three.module.js";const $={id:"chroma",title:"Chroma",tags:["vertex displacement","analytic normals","iridescence"],blurb:"An icosphere pushed around by fractal noise in the vertex shader. The interesting part is the lighting: displacing vertices invalidates the mesh normals, so this resamples the displacement at two tangent-space neighbours and rebuilds the normal per vertex. Skip that and the whole thing shades like a smooth ball wearing a lumpy costume.",stats:{vertices:"194,940","noise taps/vertex":"21",normals:"recomputed"},params:{amp:{label:"Displacement",type:"range",min:.02,max:.6,step:.01,value:.28},freq:{label:"Noise frequency",type:"range",min:.4,max:4,step:.05,value:1.5},speed:{label:"Rotation",type:"range",min:0,max:.6,step:.01,value:.15}}},F=`
   precision highp float;
 
   uniform float uTime;
@@ -10,8 +10,8 @@ import{p as y,t as w,s as x,f as b}from"./glsl.js";import{S as z,i as k,l as D,c
   varying vec3 vWorldPos;
   varying float vDisp;
 
-  ${x}
-  ${b}
+  ${k}
+  ${D}
 
   float displace(vec3 dir){
     vec3 q = dir * uFreq;
@@ -50,7 +50,7 @@ import{p as y,t as w,s as x,f as b}from"./glsl.js";import{S as z,i as k,l as D,c
 
     gl_Position = projectionMatrix * viewMatrix * world;
   }
-`,q=`
+`,N=`
   precision highp float;
 
   uniform vec3  uCameraPos;
@@ -60,8 +60,8 @@ import{p as y,t as w,s as x,f as b}from"./glsl.js";import{S as z,i as k,l as D,c
   varying vec3 vWorldPos;
   varying float vDisp;
 
-  ${y}
-  ${w}
+  ${x}
+  ${z}
 
   // Cheap procedural environment. Good enough to sell a reflection without
   // shipping a cubemap.
@@ -113,4 +113,4 @@ import{p as y,t as w,s as x,f as b}from"./glsl.js";import{S as z,i as k,l as D,c
 
     gl_FragColor = vec4(col, 1.0);
   }
-`;function N({renderer:l,width:v,height:m}){const n=new z,e=new k(45,v/m,.1,100);e.position.set(0,0,3.4);const s=new D(1,56),i=new C({vertexShader:M,fragmentShader:q,uniforms:{uTime:{value:0},uAmp:{value:.28},uFreq:{value:1.5},uRadius:{value:1},uCameraPos:{value:new P}}}),t=new S(s,i);n.add(t);const o=new A(0,0),d=new T(395021);function u(r,c,a){i.uniforms.uTime.value=r;const h=a.active?a.x:0,g=a.active?a.y:0;o.x+=(h-o.x)*.05,o.y+=(g-o.y)*.05,t.rotation.y=r*.15+o.x*.6,t.rotation.x=o.y*-.5,e.position.z=3.4,e.lookAt(0,0,0),i.uniforms.uCameraPos.value.copy(e.position),l.render(n,e)}function p(r,c){e.aspect=r/c,e.updateProjectionMatrix()}function f(){s.dispose(),i.dispose()}return{render:u,resize:p,dispose:f,background:d}}export{N as create,F as meta};
+`;function j({renderer:v,width:d,height:u,params:t={}}){const s=new q,o=new C(45,d/u,.1,100);o.position.set(0,0,3.4);const c=new P(1,56),i=new S({vertexShader:F,fragmentShader:N,uniforms:{uTime:{value:0},uAmp:{value:t.amp??.28},uFreq:{value:t.freq??1.5},uRadius:{value:1},uCameraPos:{value:new T}}}),n=new A(c,i);s.add(n);const a=new R(0,0);let l=t.speed??.15;const p=new M(395021);function f(e,m,r){i.uniforms.uTime.value=e;const w=r.active?r.x:0,b=r.active?r.y:0;a.x+=(w-a.x)*.05,a.y+=(b-a.y)*.05,n.rotation.y=e*l+a.x*.6,n.rotation.x=a.y*-.5,o.position.z=3.4,o.lookAt(0,0,0),i.uniforms.uCameraPos.value.copy(o.position),v.render(s,o)}function h(e,m){o.aspect=e/m,o.updateProjectionMatrix()}function g(){c.dispose(),i.dispose()}function y(e){e.amp!==void 0&&(i.uniforms.uAmp.value=e.amp),e.freq!==void 0&&(i.uniforms.uFreq.value=e.freq),e.speed!==void 0&&(l=e.speed)}return{render:f,resize:h,dispose:g,setParams:y,background:p}}export{j as create,$ as meta};
