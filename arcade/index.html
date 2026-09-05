@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arcade | Kiran Yarlagadda</title>
+    <meta
+      name="description"
+      content="Browser games, each one built from scratch and wrapped in a drop-in HTML tag."
+    />
+    <link rel="icon" href="/arcade/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/arcade/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/arcade/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/arcade/arcade.css" />
+  </head>
+  <body>
+    <!-- Pure ambience: the lattice scene is not the point of this page, the
+         games are. It just keeps the arcade off a flat black background. -->
+    <lab-scene name="lattice"></lab-scene>
+
+    <div class="scrim"></div>
+
+    <header class="topbar">
+      <a class="brand" href="/projects.html">
+        <svg class="mark" viewBox="0 0 64 64" width="16" height="16" aria-hidden="true">
+          <circle cx="16" cy="16" r="4.6" fill="#5c6478" />
+          <circle cx="32" cy="16" r="4.6" fill="#5c6478" />
+          <circle cx="48" cy="16" r="4.6" fill="#5c6478" />
+          <circle cx="16" cy="32" r="4.6" fill="#5c6478" />
+          <circle cx="48" cy="32" r="4.6" fill="#5c6478" />
+          <circle cx="16" cy="48" r="4.6" fill="#5c6478" />
+          <circle cx="32" cy="48" r="4.6" fill="#5c6478" />
+          <circle cx="48" cy="48" r="4.6" fill="#5c6478" />
+          <circle cx="32" cy="32" r="4.6" fill="#ffb454" />
+          <circle cx="32" cy="32" r="8" fill="none" stroke="#ffb454" stroke-opacity="0.45" stroke-width="1.8" />
+        </svg>
+        <span>arc<b>ade</b></span>
+      </a>
+      <nav id="tabs" class="tabs" aria-label="Games"></nav>
+      <output id="state" class="state" aria-label="game state">idle</output>
+    </header>
+
+    <main>
+      <div class="layout">
+        <div class="primary">
+          <div class="stage">
+            <arcade-game name="aim"></arcade-game>
+          </div>
+
+          <section class="readout">
+            <h1 id="title"></h1>
+            <p id="blurb"></p>
+            <ul id="tags" class="tags" role="list"></ul>
+          </section>
+
+          <section class="results" id="results" hidden>
+            <h2>Last run</h2>
+            <dl id="stats" class="stats"></dl>
+          </section>
+        </div>
+
+        <aside class="panel" aria-label="Game controls">
+          <div class="panel-head">
+            <h2>Controls</h2>
+            <button id="reset" class="ghost" type="button">reset</button>
+          </div>
+          <div id="controls" class="controls"></div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="hint">
+      click to start &middot; <kbd>space</kbd> restarts &middot;
+      every game is one <code>&lt;arcade-game&gt;</code> tag
+    </footer>
+
+    <script type="module" src="/assets/arcade.js"></script>
+  </body>
+</html>

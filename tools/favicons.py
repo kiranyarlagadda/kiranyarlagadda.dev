@@ -33,6 +33,19 @@ ICONS = {
         '<circle cx="32" cy="32" r="14" fill="#7fb0ff" fill-opacity="0.22"/>'
         '<circle cx="32" cy="32" r="8" fill="#7fb0ff"/>'
     ),
+    # Arcade: the package's own 3x3 mark, eight grey dots ringing an amber one.
+    "arcade": (
+        '<circle cx="16" cy="16" r="4.6" fill="#5c6478"/>'
+        '<circle cx="32" cy="16" r="4.6" fill="#5c6478"/>'
+        '<circle cx="48" cy="16" r="4.6" fill="#5c6478"/>'
+        '<circle cx="16" cy="32" r="4.6" fill="#5c6478"/>'
+        '<circle cx="48" cy="32" r="4.6" fill="#5c6478"/>'
+        '<circle cx="16" cy="48" r="4.6" fill="#5c6478"/>'
+        '<circle cx="32" cy="48" r="4.6" fill="#5c6478"/>'
+        '<circle cx="48" cy="48" r="4.6" fill="#5c6478"/>'
+        '<circle cx="32" cy="32" r="4.6" fill="#ffb454"/>'
+        '<circle cx="32" cy="32" r="8" fill="none" stroke="#ffb454" stroke-opacity="0.45" stroke-width="1.8"/>'
+    ),
 }
 
 

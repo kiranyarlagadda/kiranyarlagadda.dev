@@ -4,13 +4,15 @@ import { defineConfig } from 'vite';
 // locally and committed to assets/. Everything else here stays hand-written
 // HTML and CSS.
 //
-// Two entry points:
-//   assets/cards.js -> the project-card backdrop on /projects.html
-//   assets/lab.js   -> the <lab-scene> gallery on /lab/
+// Three entry points:
+//   assets/cards.js  -> the project-card backdrop on /projects.html
+//   assets/lab.js    -> the <lab-scene> gallery on /lab/
+//   assets/arcade.js -> the <arcade-game> tab bar on /arcade/, which also
+//                        pulls in element-lab for its lattice backdrop
 //
-// Three.js is shared between them as a common chunk, so visiting both pages
-// downloads it once. Scenes are split out individually and fetched only when
-// one is actually shown.
+// Three.js is shared across all of them as a common chunk, so visiting any
+// combination of these pages downloads it once. Scenes are split out
+// individually and fetched only when one is actually shown.
 //
 // Note the output paths: outDir is the repo root and the 'assets/' prefix lives
 // in the filename patterns, rather than outDir being 'assets' with bare names.
@@ -37,6 +39,7 @@ export default defineConfig({
       input: {
         cards: 'src/cards.js',
         lab: 'src/lab.js',
+        arcade: 'src/arcade.js',
       },
       output: {
         format: 'es',
