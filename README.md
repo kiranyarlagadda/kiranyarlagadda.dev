@@ -53,6 +53,19 @@ JavaScript finds cards by their `data-card` attribute.
 Repository links in project cards should open in a new tab with
 `target="_blank" rel="noopener noreferrer"`.
 
+## Favicons
+
+Each page has its own icon on a shared dark tile: an orbit for the home and
+projects pages, the lab dot for `/lab/`. Sources and fallbacks are generated:
+
+```bash
+python3 tools/favicons.py
+```
+
+It writes `favicon.svg`, `favicon.ico` (16 and 32 px) and `apple-touch-icon.png`
+(180 px) per page using macOS `qlmanage` and `sips`, so there is nothing to
+install. Edit the shapes in the script, rerun, commit the outputs.
+
 ## Deploying
 
 Push to `main`. A timer on the VPS notices the new commit within a minute,
