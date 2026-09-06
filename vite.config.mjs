@@ -38,6 +38,13 @@ export default defineConfig({
       output: {
         entryFileNames: 'assets/engine-[name].js',
         chunkFileNames: 'assets/engine-[name].js',
+        // Every game's adapter is called adapter.js, so name the worker's
+        // per-game chunks after the game instead of letting Rollup number
+        // them (engine-adapter.js, engine-adapter2.js).
+        manualChunks(id) {
+          const match = id.match(/\/games\/([^/]+)\//);
+          return match ? match[1] : undefined;
+        },
       },
     },
   },

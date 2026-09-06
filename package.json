@@ -8,7 +8,7 @@
     "watch": "vite build --watch"
   },
   "dependencies": {
-    "arcade": "github:kiranyarlagadda/arcade#v0.2.0",
+    "arcade": "github:kiranyarlagadda/arcade#v0.3.0",
     "element-lab": "github:kiranyarlagadda/element-lab#v0.4.0",
     "three": "^0.185.1"
   },

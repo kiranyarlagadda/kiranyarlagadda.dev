@@ -53,6 +53,12 @@ const GAME_ICONS = {
   </svg>`,
 };
 
+// Draughts: the disc from the design sheet, two turned rings.
+GAME_ICONS.draughts = `<svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true">
+  <circle cx="32" cy="32" r="19" fill="none" stroke="currentColor" stroke-width="2.6" />
+  <circle cx="32" cy="32" r="12" fill="none" stroke="currentColor" stroke-width="2" opacity="0.6" />
+</svg>`;
+
 const DEFAULT_ICON = `<svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true">
   <circle cx="32" cy="32" r="14" fill="none" stroke="currentColor" stroke-width="2.6" />
 </svg>`;

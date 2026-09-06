@@ -52,7 +52,7 @@ Scene implementation, shader checks, and the component API belong in the
 [Arcade](https://github.com/kiranyarlagadda/arcade) is the same arrangement:
 this repository holds the `/arcade/` shell, and every game plus the
 `<arcade-game>` element comes from that package, pinned to a release tag in
-both package files. The current site version is `v0.2.0`.
+both package files. The current site version is `v0.3.0`.
 
 To publish a new arcade version on the site:
 
