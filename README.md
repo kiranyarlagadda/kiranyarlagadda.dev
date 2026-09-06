@@ -33,7 +33,7 @@ project. This repository provides the `/lab/` gallery shell and project-card
 backdrops, while the scenes and `<lab-scene>` component come from that package.
 
 The dependency must remain pinned to an explicit release tag in both
-`package.json` and `package-lock.json`. The current site version is `v0.3.1`.
+`package.json` and `package-lock.json`. The current site version is `v0.4.0`.
 Do not point the site at `main` or another floating reference.
 
 To publish a new Element Lab version on the site:
@@ -52,7 +52,7 @@ Scene implementation, shader checks, and the component API belong in the
 [Arcade](https://github.com/kiranyarlagadda/arcade) is the same arrangement:
 this repository holds the `/arcade/` shell, and every game plus the
 `<arcade-game>` element comes from that package, pinned to a release tag in
-both package files. The current site version is `v0.1.1`.
+both package files. The current site version is `v0.2.0`.
 
 To publish a new arcade version on the site:
 

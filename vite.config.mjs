@@ -28,6 +28,19 @@ export default defineConfig({
   server: {
     headers: { 'Cache-Control': 'no-store' },
   },
+  // The arcade's engine runs in a module worker that imports games lazily, so
+  // its bundle must be ES format (the classic default cannot hold a dynamic
+  // import). Worker chunks get their own prefix so a chunk the worker shares
+  // by name with the page (rules.js, say) cannot overwrite the page's copy.
+  worker: {
+    format: 'es',
+    rollupOptions: {
+      output: {
+        entryFileNames: 'assets/engine-[name].js',
+        chunkFileNames: 'assets/engine-[name].js',
+      },
+    },
+  },
   build: {
     outDir: '.',
     // MUST stay false: outDir is the repo root, and emptying it would delete

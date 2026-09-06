@@ -14,15 +14,17 @@
     <link rel="stylesheet" href="/arcade/arcade.css" />
   </head>
   <body>
-    <!-- Pure ambience: the lattice scene is not the point of this page, the
-         games are. It just keeps the arcade off a flat black background. -->
-    <lab-scene name="lattice"></lab-scene>
+    <!-- The cabinet scene lives here for the intro and the select screen. It
+         gets removed entirely while a game is showing, so the game gets the
+         whole frame budget, then rebuilt on the way back out. -->
+    <div id="sceneHost" class="scene-host"></div>
 
-    <div class="scrim"></div>
-
-    <header class="topbar">
-      <a class="brand" href="/projects.html">
-        <svg class="mark" viewBox="0 0 64 64" width="16" height="16" aria-hidden="true">
+    <!-- ================================================================
+         Intro: the cabinet full-bleed at zoom 0, animated up to zoom 1,
+         then crossfaded into the select screen. Once per session. -->
+    <div id="intro" class="intro">
+      <a class="intro-brand" href="/projects.html">
+        <svg class="mark" viewBox="0 0 64 64" width="14" height="14" aria-hidden="true">
           <circle cx="16" cy="16" r="4.6" fill="#5c6478" />
           <circle cx="32" cy="16" r="4.6" fill="#5c6478" />
           <circle cx="48" cy="16" r="4.6" fill="#5c6478" />
@@ -36,43 +38,79 @@
         </svg>
         <span>arc<b>ade</b></span>
       </a>
-      <nav id="tabs" class="tabs" aria-label="Games"></nav>
-      <output id="state" class="state" aria-label="game state">idle</output>
-    </header>
+      <p class="intro-skip">click to skip</p>
+    </div>
 
-    <main>
-      <div class="layout">
-        <div class="primary">
-          <div class="stage">
-            <arcade-game name="aim"></arcade-game>
-          </div>
+    <!-- ================================================================
+         Select screen: the brand, then a row of game tiles built from the
+         package's GAME_NAMES and GAME_INFO. The cabinet stays lit behind
+         it at zoom 1, under a scrim and a CRT overlay. -->
+    <div id="select" class="select" hidden>
+      <header class="select-brand">
+        <svg class="mark" viewBox="0 0 64 64" width="24" height="24" aria-hidden="true">
+          <circle cx="16" cy="16" r="4.6" fill="#5c6478" />
+          <circle cx="32" cy="16" r="4.6" fill="#5c6478" />
+          <circle cx="48" cy="16" r="4.6" fill="#5c6478" />
+          <circle cx="16" cy="32" r="4.6" fill="#5c6478" />
+          <circle cx="48" cy="32" r="4.6" fill="#5c6478" />
+          <circle cx="16" cy="48" r="4.6" fill="#5c6478" />
+          <circle cx="32" cy="48" r="4.6" fill="#5c6478" />
+          <circle cx="48" cy="48" r="4.6" fill="#5c6478" />
+          <circle cx="32" cy="32" r="4.6" fill="#ffb454" />
+          <circle cx="32" cy="32" r="8" fill="none" stroke="#ffb454" stroke-opacity="0.45" stroke-width="1.8" />
+        </svg>
+        <span>arc<b>ade</b></span>
+      </header>
+      <div id="tiles" class="tiles" role="list" aria-label="Games"></div>
+    </div>
 
-          <section class="readout">
-            <h1 id="title"></h1>
-            <p id="blurb"></p>
-            <ul id="tags" class="tags" role="list"></ul>
-          </section>
-
-          <section class="results" id="results" hidden>
-            <h2>Last run</h2>
-            <dl id="stats" class="stats"></dl>
-          </section>
-        </div>
-
-        <aside class="panel" aria-label="Game controls">
-          <div class="panel-head">
-            <h2>Controls</h2>
-            <button id="reset" class="ghost" type="button">reset</button>
-          </div>
-          <div id="controls" class="controls"></div>
-        </aside>
+    <!-- ================================================================
+         Game screen: the arcade-game tag, centred and dominant. A slim bar
+         runs above it, a results strip fills in below it, and the schema
+         controls live in a drawer that slides in from the side. -->
+    <div id="game" class="game" hidden>
+      <div class="game-bar">
+        <button id="back" class="back" type="button">
+          <span aria-hidden="true">&larr;</span> arcade
+        </button>
+        <h1 id="gameTitle" class="game-title"></h1>
+        <output id="state" class="state" aria-label="game state">idle</output>
+        <button id="gear" class="gear" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Controls">
+          <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.4" fill="none" stroke="currentColor" stroke-width="1.6" />
+            <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <line x1="12" y1="2.5" x2="12" y2="5.5" />
+              <line x1="12" y1="18.5" x2="12" y2="21.5" />
+              <line x1="2.5" y1="12" x2="5.5" y2="12" />
+              <line x1="18.5" y1="12" x2="21.5" y2="12" />
+              <line x1="5.3" y1="5.3" x2="7.4" y2="7.4" />
+              <line x1="16.6" y1="16.6" x2="18.7" y2="18.7" />
+              <line x1="18.7" y1="5.3" x2="16.6" y2="7.4" />
+              <line x1="7.4" y1="16.6" x2="5.3" y2="18.7" />
+            </g>
+          </svg>
+        </button>
       </div>
-    </main>
 
-    <footer class="hint">
-      click to start &middot; <kbd>space</kbd> restarts &middot;
-      every game is one <code>&lt;arcade-game&gt;</code> tag
-    </footer>
+      <div class="stage">
+        <arcade-game id="stage"></arcade-game>
+      </div>
+
+      <section class="results" id="results" hidden>
+        <dl id="stats" class="stats"></dl>
+      </section>
+
+      <aside class="drawer" id="drawer" aria-label="Game controls" hidden>
+        <div class="drawer-head">
+          <h2>Controls</h2>
+          <div class="drawer-head-buttons">
+            <button id="reset" class="ghost" type="button">reset</button>
+            <button id="drawerClose" class="ghost" type="button">close</button>
+          </div>
+        </div>
+        <div id="controls" class="controls"></div>
+      </aside>
+    </div>
 
     <script type="module" src="/assets/arcade.js"></script>
   </body>

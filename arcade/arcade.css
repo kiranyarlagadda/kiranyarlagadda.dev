@@ -1,7 +1,7 @@
-/* Arcade chrome. Unlike the lab, this page scrolls: the games are played, not
-   just watched, so a fixed single-screen layout would clip a phone's controls
-   right off the bottom. The lattice scene is still just backdrop underneath
-   it all. */
+/* Arcade chrome: an intro that flies into a cabinet screen, a game-select
+   screen built on top of that same cabinet, then the chosen game full-focus
+   with the cabinet gone entirely. Three screens, one dark ground, one amber
+   accent throughout so the whole thing reads as one place. */
 
 :root {
   --ink: #eef1f8;
@@ -24,66 +24,234 @@ body {
   margin: 0;
   min-height: 100vh;
   /* The ground is painted by html. If body paints it too, it lands on top of
-     the negative z-index scene below and the backdrop vanishes. */
+     the negative z-index scene host below and the backdrop vanishes. */
   background: transparent;
   color: var(--ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
-/* The scene and scrim are the only fixed elements on an otherwise normal-flow
-   page, so they need an explicit negative z-index. Painting order otherwise
-   puts in-flow content behind positioned descendants, which is the reverse of
-   what a backdrop needs. */
-lab-scene {
+[hidden] { display: none !important; }
+
+/* ------------------------------------------------------------- scene host */
+
+/* The cabinet lives here for the intro and the select screen only. It is an
+   empty shell until JS mounts a <lab-scene> into it, and is torn back down to
+   empty the moment a game is showing. */
+.scene-host {
   position: fixed;
   inset: 0;
   z-index: -2;
+}
+
+.scene-host lab-scene {
+  position: fixed;
+  inset: 0;
   display: block;
 }
 
-lab-scene[data-state='unsupported'] {
+.scene-host lab-scene[data-state='unsupported'],
+.scene-host lab-scene[data-state='error'] {
   background:
     radial-gradient(circle at 30% 30%, #241d3d 0, transparent 55%),
     radial-gradient(circle at 70% 70%, #16203d 0, transparent 55%),
     var(--bg);
 }
 
-.scrim {
+/* --------------------------------------------------------------- shared */
+
+/* Both the intro and the select screen sit full-bleed over the scene host,
+   fixed so neither ever contributes to page scroll. */
+.intro,
+.select {
+  position: fixed;
+  inset: 0;
+  transition: opacity 400ms ease;
+}
+
+/* ---------------------------------------------------------------- intro */
+
+.intro {
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 1.5rem 1.8rem;
+  cursor: pointer;
+  opacity: 1;
+}
+
+.intro.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink-dim);
+  text-decoration: none;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+.intro-brand b { color: var(--ink); font-weight: 600; }
+.intro-brand .mark { flex-shrink: 0; }
+
+.intro-skip {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-faint);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+
+/* -------------------------------------------------------- select screen */
+
+.select {
+  z-index: 3;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  padding: 3.2rem 1.6rem 3rem;
+}
+
+.select.is-visible { opacity: 1; }
+
+/* CRT treatment: faint scanlines, a vignette, and a soft amber glow pressed
+   in from the edges, so the tiles read as though they are drawn on the same
+   screen the intro just flew into. */
+.select::before,
+.select::after {
+  content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
+}
+.select::before {
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.16) 0px,
+    rgba(0, 0, 0, 0.16) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: multiply;
+}
+.select::after {
   background:
-    radial-gradient(120% 60% at 50% 0%, rgba(4, 5, 10, 0.82) 0%, rgba(4, 5, 10, 0) 60%),
-    linear-gradient(to bottom, rgba(4, 5, 10, 0.55) 0%, rgba(4, 5, 10, 0.86) 100%);
+    radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(4, 5, 10, 0.82) 100%),
+    radial-gradient(140% 60% at 50% 0%, rgba(255, 180, 84, 0.10) 0%, transparent 60%),
+    radial-gradient(140% 60% at 50% 100%, rgba(255, 180, 84, 0.08) 0%, transparent 60%);
 }
 
-/* ---------------------------------------------------------------- topbar */
-
-.topbar {
+.select-brand {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  padding: 1.1rem 1.6rem;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
+  gap: 0.7rem;
+  /* auto top margin pairs with .tiles' auto bottom margin: the pair sits in
+     the middle of the screen, and still scrolls if the tiles ever overflow. */
+  margin-top: auto;
+  margin-bottom: 2.4rem;
   font-family: var(--font-mono);
-  font-size: 0.86rem;
+  font-size: 1.15rem;
   color: var(--ink-dim);
-  text-decoration: none;
 }
-.brand b { color: var(--ink); font-weight: 600; }
-.brand:hover { color: var(--ink); }
-.brand .mark { flex-shrink: 0; }
+.select-brand b { color: var(--ink); font-weight: 600; }
 
-.tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.1rem;
+  max-width: 64rem;
+  width: 100%;
+  margin-bottom: auto;
+}
 
-.tab {
+.tile {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 15rem;
+  padding: 1.6rem 1.3rem 1.4rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(8, 10, 18, 0.72);
+  backdrop-filter: blur(10px);
+  color: var(--ink);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+.tile:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 180, 84, 0.35);
+  background: rgba(14, 16, 26, 0.82);
+}
+.tile:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.tile-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.6rem;
+  color: var(--ink); /* chess and any icon without its own fixed colours */
+}
+
+.tile-title {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.tile-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid rgba(255, 180, 84, 0.28);
+  background: rgba(255, 180, 84, 0.07);
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+}
+
+.tile-blurb {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink-dim);
+}
+
+/* ---------------------------------------------------------- game screen */
+
+.game {
+  min-height: 100vh;
+  padding: 1.1rem 1.6rem 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: min(94vw, calc(76vh * 1.5));
+  margin: 0 auto 0.9rem;
+}
+
+.back {
   appearance: none;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.03);
@@ -93,14 +261,24 @@ lab-scene[data-state='unsupported'] {
   padding: 0.4rem 0.85rem;
   border-radius: 999px;
   cursor: pointer;
-  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+  transition: color 160ms ease, border-color 160ms ease;
 }
-.tab:hover { color: var(--ink); border-color: rgba(255, 255, 255, 0.24); }
-.tab.is-active { color: #04050a; background: var(--ink); border-color: var(--ink); }
-.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.back:hover { color: var(--ink); border-color: rgba(255, 255, 255, 0.24); }
+.back:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.game-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .state {
-  margin-left: auto;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.03);
   color: var(--ink-faint);
@@ -116,125 +294,98 @@ lab-scene[data-state='unsupported'] {
 .state[data-state='running'] { color: var(--accent); border-color: rgba(255, 180, 84, 0.35); }
 .state[data-state='countdown'] { color: var(--ink); }
 
-/* ----------------------------------------------------------------- layout */
-
-main {
-  padding-bottom: 4rem;
+.gear {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink-dim);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease;
 }
-
-.layout {
-  max-width: 64rem;
-  margin: 0 auto;
-  padding: 0.5rem 1.6rem 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 17.5rem;
-  align-items: start;
-  gap: 2rem;
-}
-
-.primary { min-width: 0; }
+.gear:hover { color: var(--ink); border-color: rgba(255, 255, 255, 0.24); }
+.gear:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gear.is-active { color: var(--accent); border-color: rgba(255, 180, 84, 0.35); }
 
 /* ------------------------------------------------------------------ stage */
 
 .stage {
-  max-width: 720px;
-  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
-arcade-game {
+/* The package injects its own base stylesheet (width: 100%) after this one
+   loads, so an ID selector is used here rather than the bare element: equal
+   specificity would otherwise let that later rule win the cascade. */
+#stage {
+  width: min(94vw, calc(76vh * 1.5));
   border: 1px solid var(--line);
   border-radius: 12px;
   outline: none;
 }
-arcade-game:focus-visible {
+#stage:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-}
-
-/* --------------------------------------------------------------- readout */
-
-.readout {
-  max-width: 720px;
-  margin: 1.5rem auto 0;
-}
-
-.readout h1 {
-  margin: 0 0 0.5rem;
-  font-size: clamp(1.6rem, 3.6vw, 2.2rem);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-}
-
-.readout p {
-  margin: 0 0 1rem;
-  font-size: 0.94rem;
-  line-height: 1.6;
-  color: var(--ink-dim);
-  text-wrap: pretty;
-}
-
-.tags {
-  display: flex; flex-wrap: wrap; gap: 0.4rem;
-  list-style: none; margin: 0; padding: 0;
-}
-.tags li {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--accent);
-  border: 1px solid rgba(255, 180, 84, 0.28);
-  background: rgba(255, 180, 84, 0.07);
-  padding: 0.24rem 0.6rem;
-  border-radius: 4px;
 }
 
 /* --------------------------------------------------------------- results */
 
 .results {
-  max-width: 720px;
-  margin: 1.5rem auto 0;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--line);
-}
-
-.results h2 {
-  margin: 0 0 0.75rem;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
+  width: min(94vw, calc(76vh * 1.5));
+  margin: 1rem auto 0;
 }
 
 .stats {
-  display: grid;
-  grid-template-columns: auto auto;
-  gap: 0.32rem 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.4rem;
   margin: 0;
-  width: fit-content;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
 }
-.stats dt { color: var(--ink-faint); }
-.stats dd { margin: 0; color: var(--ink); text-align: right; }
+.stats:empty { display: none; }
 
-/* ---------------------------------------------------------- control panel */
-
-.panel {
-  position: sticky;
-  top: 1.5rem;
-  padding: 1rem 1.1rem 1.1rem;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(8, 10, 18, 0.72);
-  backdrop-filter: blur(14px);
+/* One label/value pair per <div>, so the flex gap lands between pairs rather
+   than wedging itself between a label and its own value. */
+.stat {
+  display: flex;
+  gap: 0.4rem;
 }
+.stat dt, .stat dd { margin: 0; }
+.stat dt { color: var(--ink-faint); }
+.stat dd { color: var(--ink); }
 
-.panel-head {
+/* ----------------------------------------------------------- drawer */
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 17.5rem;
+  padding: 1.2rem 1.1rem 1.5rem;
+  border-left: 1px solid var(--line);
+  background: rgba(8, 10, 18, 0.92);
+  backdrop-filter: blur(14px);
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 260ms ease;
+  z-index: 6;
+}
+.drawer.is-open { transform: translateX(0); }
+
+.drawer-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -242,7 +393,9 @@ arcade-game:focus-visible {
   margin-bottom: 0.85rem;
 }
 
-.panel-head h2 {
+.drawer-head-buttons { display: flex; gap: 0.4rem; }
+
+.drawer-head h2 {
   margin: 0;
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -267,6 +420,13 @@ arcade-game:focus-visible {
 .ghost:hover { color: var(--ink); border-color: rgba(255, 255, 255, 0.26); }
 .ghost:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+/* ------------------------------------------------------------- controls */
+/*
+ * Kept from the previous single-panel layout: built from whatever a game
+ * declares in meta.params (src/arcade.js's buildControls), so a new knob on
+ * a game needs no change here.
+ */
+
 .controls { display: flex; flex-direction: column; gap: 0.7rem; }
 .controls:empty { display: none; }
 
@@ -280,7 +440,7 @@ arcade-game:focus-visible {
 }
 
 /* Sensitivity and crosshair style only do anything in raw pointer mode, so
-   the panel greys them out rather than let a visitor turn a knob that is
+   the drawer greys them out rather than let a visitor turn a knob that is
    quietly connected to nothing. */
 .control.is-disabled {
   opacity: 0.4;
@@ -354,41 +514,51 @@ arcade-game:focus-visible {
 }
 .control:has(.control-select) .control-value { display: none; }
 
-/* ---------------------------------------------------------------- footer */
-
-.hint {
-  max-width: 64rem;
-  margin: 0 auto;
-  padding: 0 1.6rem 2rem;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--ink-faint);
-}
-.hint code { color: var(--ink-dim); }
-
-kbd {
-  display: inline-block;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 0.05rem 0.34rem;
-  margin: 0 0.1rem;
-  font-family: inherit;
-  font-size: 0.68rem;
-  color: var(--ink-dim);
-}
+/* --------------------------------------------------------------- mobile */
 
 @media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; }
-  .panel { position: static; }
+  .select { padding-top: 4rem; }
+  .select-brand { font-size: 1rem; }
 }
 
 @media (max-width: 600px) {
-  .topbar { padding: 0.9rem 1.1rem; gap: 0.75rem; }
-  .brand span:last-child { display: none; }
-  .layout { padding: 0.5rem 1.1rem 0; }
-  .hint { padding: 0 1.1rem 2rem; font-size: 0.62rem; }
+  .intro { padding: 1.1rem; }
+  .select { padding: 3.6rem 1.1rem 2.5rem; }
+  .tiles { flex-direction: column; align-items: center; }
+  .tile { width: 100%; max-width: 22rem; }
+
+  .game { padding: 0.9rem 1rem 2rem; }
+  .game-bar { width: 100%; }
+  #stage,
+  .results { width: 100%; }
+  .game-title { font-size: 0.9rem; }
+
+  /* The drawer becomes a bottom sheet: same content, docked to the bottom
+     edge and sliding up instead of in from the side. */
+  .drawer {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 70vh;
+    border-left: none;
+    border-top: 1px solid var(--line);
+    border-radius: 14px 14px 0 0;
+    transform: translateY(100%);
+  }
+  .drawer.is-open { transform: translateY(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tab, .control { transition: none; }
+  .intro,
+  .select,
+  .tile,
+  .control,
+  .back,
+  .gear,
+  .ghost,
+  .drawer {
+    transition: none;
+  }
 }
