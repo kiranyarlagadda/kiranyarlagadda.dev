@@ -2,7 +2,7 @@
 
 Source for [kiranyarlagadda.dev](https://kiranyarlagadda.dev): a small personal
 site with a homepage, project list, an interactive WebGL gallery, and an arcade
-of browser games. Most pages are hand-written HTML and CSS; Vite only builds the
+of browser games. Most pages are plain HTML and CSS; Vite only builds the
 WebGL pieces and the arcade bundle.
 
 ## Local development

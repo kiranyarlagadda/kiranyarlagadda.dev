@@ -30,7 +30,7 @@ const isTouch = matchMedia('(pointer: coarse)').matches;
 // ------------------------------------------------------------------ marks
 //
 // Tile icons. Aim reuses the brand's 3x3 mark (it already reads as a grid of
-// targets); chess gets a small hand-drawn crown. Both use currentColor so
+// targets); chess gets a small crown. Both use currentColor so
 // .tile-icon's own color rule decides the ink.
 
 const GAME_ICONS = {

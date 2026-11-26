@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
 
 // The VPS deploy is a plain file sync with no build step, so bundles are built
-// locally and committed to assets/. Everything else here stays hand-written
-// HTML and CSS.
+// locally and committed to assets/. Everything else here stays plain HTML
+// and CSS.
 //
 // Three entry points:
 //   assets/cards.js  -> the project-card backdrop on /projects.html
